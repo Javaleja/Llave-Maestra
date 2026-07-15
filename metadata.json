@@ -1,0 +1,6 @@
+{
+  "name": "Llave Maestra",
+  "description": "Memoria técnica y base de conocimiento avanzado para cerrajería automotriz.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
