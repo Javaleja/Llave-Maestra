@@ -83,7 +83,7 @@ export default function Search({ onSelectVehicle, onRegistrar, onAdmin }: Search
                 >
                   <div className="flex flex-col">
                     <div className="flex items-center gap-3">
-                      <span className="text-[15px] font-medium text-[#111111]">{v.make} {v.model} {v.year} {v.patente && `| Patente: ${v.patente}`}</span>
+                      <span className="text-[15px] font-medium text-[#111111]">{v.make} {v.model} {v.year} {v.patente ? `| Patente: ${v.patente}` : "| Sin Patente"}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-1">
                       {v.ecu && <span className="text-[13px] text-[#6B7280]">ECU: {v.ecu}</span>}

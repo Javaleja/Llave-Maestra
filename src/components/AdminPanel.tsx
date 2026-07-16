@@ -151,7 +151,7 @@ export default function AdminPanel() {
   };
 
   const filteredVehicles = vehicles.filter(v => 
-    `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${v.make} ${v.model} ${v.year} ${v.patente || ""} ${v.chasis || ""}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredJobs = jobs.filter(j => 
@@ -219,7 +219,7 @@ export default function AdminPanel() {
                   filteredVehicles.map(v => (
                     <tr key={v.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 text-gray-400">{v.id}</td>
-                      <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year} {v.patente && `| Patente: ${v.patente}`}</td>
+                      <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year} {v.patente ? `| Patente: ${v.patente}` : "| Sin Patente"}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => handleOpenModal(v)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
