@@ -4,6 +4,8 @@ import { AlertTriangle, Clock, ChevronRight, FileText, Camera, Trash2, Edit2, X,
 
 import EditJobModal from "./EditJobModal";
 
+import EditVehicleModal from "./EditVehicleModal";
+
 interface FichaProps {
   vehicleId: number;
   onEditJob?: (jobId: number) => void;
@@ -22,6 +24,8 @@ export default function Ficha({ vehicleId }: FichaProps) {
   const [data, setData] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAddingJob, setIsAddingJob] = useState(false);
+  const [editingJob, setEditingJob] = useState<any>(null);
+  const [isEditingVehicle, setIsEditingVehicle] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -72,9 +76,17 @@ export default function Ficha({ vehicleId }: FichaProps) {
         </div>
 
         {/* Title */}
-        <h1 className="text-[48px] font-bold tracking-tight text-[#111111] leading-[1.1] mb-8">
-          {data.make} {data.model}
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-[48px] font-bold tracking-tight text-[#111111] leading-[1.1]">
+            {data.make} {data.model}
+          </h1>
+          <button 
+            onClick={() => setIsEditingVehicle(true)}
+            className="flex items-center justify-center p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Edit2 className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Critical Warnings */}
         {data.warnings && (
@@ -171,6 +183,13 @@ export default function Ficha({ vehicleId }: FichaProps) {
                           {job.jobType || job.tipoServicio}
                         </span>
                       </div>
+                      <button 
+                        onClick={() => setEditingJob(job)}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all"
+                        title="Editar Trabajo"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
                     </div>
                     <div className="flex items-center gap-3 text-[13px] text-[#6B7280]">
                       <span>{new Date(job.date).toLocaleDateString()}</span>
@@ -276,6 +295,28 @@ export default function Ficha({ vehicleId }: FichaProps) {
           onClose={() => setIsAddingJob(false)}
           onSaved={() => {
             setIsAddingJob(false);
+            fetchData();
+          }}
+        />
+      )}
+      {editingJob && (
+        <EditJobModal
+          job={editingJob}
+          isOpen={!!editingJob}
+          onClose={() => setEditingJob(null)}
+          onSaved={() => {
+            setEditingJob(null);
+            fetchData();
+          }}
+        />
+      )}
+      {isEditingVehicle && (
+        <EditVehicleModal
+          vehicleId={vehicleId}
+          isOpen={isEditingVehicle}
+          onClose={() => setIsEditingVehicle(false)}
+          onSaved={() => {
+            setIsEditingVehicle(false);
             fetchData();
           }}
         />

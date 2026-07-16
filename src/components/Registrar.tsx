@@ -33,20 +33,6 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
   const [isLoadingVehicle, setIsLoadingVehicle] = useState(!!vehicleId);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Existing vehicles
-  const [allVehicles, setAllVehicles] = useState<any[]>([]);
-  const [vehicleSearch, setVehicleSearch] = useState("");
-  const [selectedExistingId, setSelectedExistingId] = useState<number | null>(vehicleId);
-
-  useEffect(() => {
-    if (!vehicleId) {
-      fetch("/api/vehicles")
-        .then(res => res.json())
-        .then(data => setAllVehicles(data))
-        .catch(console.error);
-    }
-  }, [vehicleId]);
-
   // Vehicle State
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -120,8 +106,8 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
     setErrorMsg("");
     try {
       const payload = {
-        vehicleId: selectedExistingId,
-        newVehicleInfo: selectedExistingId ? undefined : { 
+        vehicleId: vehicleId,
+        newVehicleInfo: { 
           make, 
           model, 
           year, 
@@ -174,84 +160,35 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
         <div className="space-y-12 flex-1">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col space-y-10">
             
-            {!vehicleId && (
-              <div className="space-y-6 relative">
-                <h2 className="text-[18px] font-bold text-[#111111] mb-6">Buscar Vehículo Existente (Opcional)</h2>
-                <div>
-                  <Input 
-                    value={vehicleSearch} 
-                    onChange={(e: any) => {
-                      setVehicleSearch(e.target.value);
-                      if (!e.target.value) setSelectedExistingId(null);
-                    }} 
-                    placeholder="Ej. Chevrolet Onix 2022..." 
-                  />
-                  {vehicleSearch && !selectedExistingId && (
-                    <div className="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                      {allVehicles
-                        .filter(v => `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(vehicleSearch.toLowerCase()))
-                        .map(v => (
-                          <button
-                            key={v.id}
-                            type="button"
-                            className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
-                            onClick={() => {
-                              setSelectedExistingId(v.id);
-                              setVehicleSearch(`${v.make} ${v.model} ${v.year}`);
-                              setMake(v.make);
-                              setModel(v.model);
-                              setYear(v.year);
-                              setEcu(v.ecu || "");
-                              setBcm(v.bcm || "");
-                              setChip(v.chip || "");
-                              setFrequency(v.frequency || "");
-                              setKeyBlade(v.keyBlade || "");
-                              setClavesPuerta(v.clavesPuerta ? String(v.clavesPuerta) : "");
-                              setClavesContacto(v.clavesContacto ? String(v.clavesContacto) : "");
-                              setMismasClaves(v.mismasClaves || "");
-                            }}
-                          >
-                            <span className="font-medium text-[#111111]">{v.make} {v.model}</span> <span className="text-gray-500">{v.year}</span>
-                          </button>
-                        ))}
-                      {allVehicles.filter(v => `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(vehicleSearch.toLowerCase())).length === 0 && (
-                        <div className="px-4 py-3 text-sm text-gray-500">No se encontraron vehículos. Se creará uno nuevo.</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className={`space-y-6 ${selectedExistingId && !vehicleId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="space-y-6">
               <h2 className="text-[18px] font-bold text-[#111111] mb-6">Vehículo</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div>
                   <Label>Marca *</Label>
-                  <Input autoFocus={!vehicleId} value={make} onChange={(e: any) => setMake(e.target.value)} disabled={!!vehicleId || !!selectedExistingId} placeholder="Ej. Volkswagen" className={vehicleId || selectedExistingId ? "opacity-50" : ""} />
+                  <Input autoFocus={!vehicleId} value={make} onChange={(e: any) => setMake(e.target.value)} disabled={!!vehicleId} placeholder="Ej. Volkswagen" className={vehicleId ? "opacity-50" : ""} />
                 </div>
                 <div>
                   <Label>Modelo *</Label>
-                  <Input value={model} onChange={(e: any) => setModel(e.target.value)} disabled={!!vehicleId || !!selectedExistingId} placeholder="Ej. Golf" className={vehicleId || selectedExistingId ? "opacity-50" : ""} />
+                  <Input value={model} onChange={(e: any) => setModel(e.target.value)} disabled={!!vehicleId} placeholder="Ej. Golf" className={vehicleId ? "opacity-50" : ""} />
                 </div>
                 <div>
                   <Label>Año *</Label>
-                  <Input value={year} onChange={(e: any) => setYear(e.target.value)} disabled={!!vehicleId || !!selectedExistingId} placeholder="Ej. 2018" className={vehicleId || selectedExistingId ? "opacity-50" : ""} />
+                  <Input value={year} onChange={(e: any) => setYear(e.target.value)} disabled={!!vehicleId} placeholder="Ej. 2018" className={vehicleId ? "opacity-50" : ""} />
                 </div>
               </div>
             </div>
 
-            <div className={`space-y-6 pt-6 border-t border-[#F3F4F6] ${selectedExistingId && !vehicleId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="space-y-6 pt-6 border-t border-[#F3F4F6]">
               <h2 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones (Opcional)</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div><Label>Chip (Transponder)</Label><Input disabled={!!vehicleId || !!selectedExistingId} className={vehicleId || selectedExistingId ? "opacity-50" : ""} value={chip} onChange={(e: any) => setChip(e.target.value)} placeholder="Ej. ID48 Megamos" /></div>
-                <div><Label>Frecuencia</Label><Input disabled={!!vehicleId || !!selectedExistingId} className={vehicleId || selectedExistingId ? "opacity-50" : ""} value={frequency} onChange={(e: any) => setFrequency(e.target.value)} placeholder="Ej. 433 MHz" /></div>
-                <div><Label>ECU</Label><Input disabled={!!vehicleId || !!selectedExistingId} className={vehicleId || selectedExistingId ? "opacity-50" : ""} value={ecu} onChange={(e: any) => setEcu(e.target.value)} placeholder="Ej. Bosch EDC17" /></div>
-                <div><Label>BCM / Cuadro</Label><Input disabled={!!vehicleId || !!selectedExistingId} className={vehicleId || selectedExistingId ? "opacity-50" : ""} value={bcm} onChange={(e: any) => setBcm(e.target.value)} placeholder="Ej. MQB VDO" /></div>
+                <div><Label>Chip (Transponder)</Label><Input disabled={!!vehicleId} className={vehicleId ? "opacity-50" : ""} value={chip} onChange={(e: any) => setChip(e.target.value)} placeholder="Ej. ID48 Megamos" /></div>
+                <div><Label>Frecuencia</Label><Input disabled={!!vehicleId} className={vehicleId ? "opacity-50" : ""} value={frequency} onChange={(e: any) => setFrequency(e.target.value)} placeholder="Ej. 433 MHz" /></div>
+                <div><Label>ECU</Label><Input disabled={!!vehicleId} className={vehicleId ? "opacity-50" : ""} value={ecu} onChange={(e: any) => setEcu(e.target.value)} placeholder="Ej. Bosch EDC17" /></div>
+                <div><Label>BCM / Cuadro</Label><Input disabled={!!vehicleId} className={vehicleId ? "opacity-50" : ""} value={bcm} onChange={(e: any) => setBcm(e.target.value)} placeholder="Ej. MQB VDO" /></div>
               </div>
             </div>
 
-            <div className={`space-y-6 pt-6 border-t border-[#F3F4F6] ${selectedExistingId && !vehicleId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="space-y-6 pt-6 border-t border-[#F3F4F6]">
               <h2 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones del Cilindro</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div>
@@ -259,9 +196,9 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
                   <Input 
                     value={keyBlade} 
                     onChange={(e: any) => setKeyBlade(e.target.value)} 
-                    disabled={!!vehicleId || !!selectedExistingId}
+                    disabled={!!vehicleId}
                     placeholder="Ej. HU66, SIP22" 
-                    className={vehicleId || selectedExistingId ? "opacity-50" : ""}
+                    className={vehicleId ? "opacity-50" : ""}
                   />
                 </div>
                 <div>
@@ -270,9 +207,9 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
                     type="number" 
                     value={clavesPuerta} 
                     onChange={(e: any) => setClavesPuerta(e.target.value)} 
-                    disabled={!!vehicleId || !!selectedExistingId}
+                    disabled={!!vehicleId}
                     placeholder="Ej. 8" 
-                    className={vehicleId || selectedExistingId ? "opacity-50" : ""}
+                    className={vehicleId ? "opacity-50" : ""}
                   />
                 </div>
                 <div>
@@ -281,9 +218,9 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
                     type="number" 
                     value={clavesContacto} 
                     onChange={(e: any) => setClavesContacto(e.target.value)} 
-                    disabled={!!vehicleId || !!selectedExistingId}
+                    disabled={!!vehicleId}
                     placeholder="Ej. 10" 
-                    className={vehicleId || selectedExistingId ? "opacity-50" : ""}
+                    className={vehicleId ? "opacity-50" : ""}
                   />
                 </div>
                 <div className="col-span-1 sm:col-span-2">
@@ -291,25 +228,25 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
                   <div className="flex gap-4 mt-1">
                     <button
                       type="button"
-                      disabled={!!vehicleId || !!selectedExistingId}
+                      disabled={!!vehicleId}
                       onClick={() => setMismasClaves("Sí")}
                       className={`flex-1 py-2.5 px-4 rounded-xl border text-center transition-all text-sm font-medium ${
                         mismasClaves === "Sí"
                           ? "border-black bg-black text-white"
                           : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
-                      } ${vehicleId || selectedExistingId ? "opacity-50 cursor-not-allowed" : ""}`}
+                      } ${vehicleId ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       Sí
                     </button>
                     <button
                       type="button"
-                      disabled={!!vehicleId || !!selectedExistingId}
+                      disabled={!!vehicleId}
                       onClick={() => setMismasClaves("No")}
                       className={`flex-1 py-2.5 px-4 rounded-xl border text-center transition-all text-sm font-medium ${
                         mismasClaves === "No"
                           ? "border-black bg-black text-white"
                           : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
-                      } ${vehicleId || selectedExistingId ? "opacity-50 cursor-not-allowed" : ""}`}
+                      } ${vehicleId ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       No
                     </button>
