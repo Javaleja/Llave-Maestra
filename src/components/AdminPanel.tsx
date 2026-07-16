@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, X, Search as SearchIcon } from "lucide-react";
-import ImageUploader from "./ImageUploader";
 
 const safeJsonParse = (str: string | null) => {
   if (!str) return [];
@@ -39,7 +38,6 @@ export default function AdminPanel() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-  const [newPhotos, setNewPhotos] = useState<string[]>([]);
   
   // Form state
   const [formData, setFormData] = useState<Partial<Vehicle>>({
@@ -68,7 +66,6 @@ export default function AdminPanel() {
   }, []);
 
   const handleOpenModal = (vehicle?: Vehicle) => {
-    setNewPhotos([]);
     if (vehicle) {
       setEditingVehicle(vehicle);
       setFormData(vehicle);
@@ -86,15 +83,6 @@ export default function AdminPanel() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingVehicle(null);
-    setNewPhotos([]);
-  };
-
-  const handleRemoveExistingPhoto = (photoUrlToRemove: string) => {
-    if (formData.photos) {
-      const currentPhotos = safeJsonParse(formData.photos);
-      const updatedPhotos = currentPhotos.filter((photo: string) => photo !== photoUrlToRemove);
-      setFormData({ ...formData, photos: JSON.stringify(updatedPhotos) });
-    }
   };
 
   const handleSave = async () => {
@@ -103,10 +91,6 @@ export default function AdminPanel() {
       const method = editingVehicle ? "PUT" : "POST";
       
       const payload = { ...formData };
-      if (newPhotos.length > 0) {
-        const existingPhotos = safeJsonParse(payload.photos || null);
-        payload.photos = JSON.stringify([...existingPhotos, ...newPhotos]);
-      }
       
       const res = await fetch(url, {
         method,
@@ -276,20 +260,6 @@ export default function AdminPanel() {
                     <option value="Sí">Sí</option>
                     <option value="No">No</option>
                   </select>
-                </div>
-              </div>
-              
-              <div className="mt-8 pt-8 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Fotografías del Vehículo</h3>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-500 mb-3">Subir nuevas imágenes</h4>
-                  <ImageUploader 
-                    onImagesChange={setNewPhotos} 
-                    maxFiles={5}
-                    existingImages={formData.photos ? safeJsonParse(formData.photos) : []}
-                    onRemoveExistingImage={handleRemoveExistingPhoto}
-                  />
                 </div>
               </div>
             </div>
