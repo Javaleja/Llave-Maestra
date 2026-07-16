@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, X, ImageIcon, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "../lib/supabase";
+import imageCompression from 'browser-image-compression';
 
 interface ImageUploaderProps {
   onImagesChange: (urls: string[]) => void;
@@ -65,13 +66,20 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5, existingIm
         throw new Error("Supabase credentials not configured");
       }
 
-      const fileExt = imgObj.file.name.split('.').pop();
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true
+      };
+      const compressedFile = await imageCompression(imgObj.file, options);
+
+      const fileExt = compressedFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `trabajos/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from('images') // Adjust bucket name as needed
-        .upload(filePath, imgObj.file);
+        .upload(filePath, compressedFile);
 
       if (error) {
         throw error;
@@ -104,7 +112,26 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5, existingIm
     }
   };
 
-  const removeImage = (indexToRemove: number) => {
+  const deleteFromSupabase = async (url: string) => {
+    if (!url || !url.includes('supabase.co')) return;
+    try {
+      const urlObj = new URL(url);
+      const parts = urlObj.pathname.split('/public/images/');
+      if (parts.length > 1) {
+        const filePath = parts[1];
+        await supabase.storage.from('images').remove([filePath]);
+      }
+    } catch (err) {
+      console.error("Error removing image from Supabase:", err);
+    }
+  };
+
+  const removeImage = async (indexToRemove: number) => {
+    const imgToRemove = images[indexToRemove];
+    if (!imgToRemove.uploading && !imgToRemove.error) {
+      await deleteFromSupabase(imgToRemove.url);
+    }
+
     setImages(prev => {
       const newImages = prev.filter((_, idx) => idx !== indexToRemove);
       const completedUrls = newImages.filter(i => !i.uploading && !i.error).map(i => i.url);
@@ -161,7 +188,11 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5, existingIm
                 />
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); onRemoveExistingImage?.(url); }}
+                  onClick={async (e) => { 
+                    e.stopPropagation(); 
+                    await deleteFromSupabase(url);
+                    onRemoveExistingImage?.(url); 
+                  }}
                   className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#111111] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
                 >
                   <X className="w-4 h-4" />
@@ -213,3 +244,4 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5, existingIm
     </div>
   );
 }
+
