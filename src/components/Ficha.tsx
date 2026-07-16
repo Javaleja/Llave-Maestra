@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-import { AlertTriangle, Clock, ChevronRight, FileText, Camera, Trash2, Edit2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { AlertTriangle, Clock, ChevronRight, FileText, Camera, Trash2, Edit2, X } from "lucide-react";
 
 interface FichaProps {
   vehicleId: number;
@@ -18,6 +18,7 @@ const safeJsonParse = (str: string | null) => {
 
 export default function Ficha({ vehicleId, onEditJob }: FichaProps) {
   const [data, setData] = useState<any>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -233,8 +234,12 @@ export default function Ficha({ vehicleId, onEditJob }: FichaProps) {
                       <h4 className="text-[12px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-4">Fotografías</h4>
                       <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0">
                         {safeJsonParse(job.photos).map((photo: string, i: number) => (
-                          <div key={i} className="flex-none w-[200px] aspect-[4/3] rounded-xl overflow-hidden bg-[#F9FAFB] border border-[#E5E7EB]">
-                            <img src={photo} alt={`Foto del trabajo ${i+1}`} className="w-full h-full object-cover" />
+                          <div 
+                            key={i} 
+                            onClick={() => setSelectedImage(photo)}
+                            className="flex-none w-[200px] aspect-[4/3] rounded-xl overflow-hidden bg-[#F9FAFB] border border-[#E5E7EB] cursor-pointer hover:opacity-90 transition-opacity"
+                          >
+                            <img src={photo} alt={`Foto del trabajo ${i+1}`} className="w-full h-full object-cover pointer-events-none" />
                           </div>
                         ))}
                       </div>
@@ -246,6 +251,39 @@ export default function Ficha({ vehicleId, onEditJob }: FichaProps) {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 cursor-zoom-out"
+          >
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-6 right-6 p-2 text-white/70 hover:text-white bg-black/50 hover:bg-black/70 rounded-full transition-colors z-[101]"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-5xl w-full max-h-[85vh] flex items-center justify-center cursor-auto"
+            >
+              <img 
+                src={selectedImage} 
+                alt="Vista ampliada" 
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
