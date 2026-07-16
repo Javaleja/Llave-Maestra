@@ -193,7 +193,7 @@ export default function AdminPanel() {
           <SearchIcon className="w-5 h-5 text-gray-400" />
           <input 
             type="text"
-            placeholder={activeTab === "vehicles" ? "Buscar por marca, modelo o año..." : "Buscar por tipo de servicio..."}
+            placeholder={activeTab === "vehicles" ? "Buscar por marca, modelo, año, patente..." : "Buscar por tipo de servicio..."}
             className="flex-1 outline-none text-sm placeholder:text-gray-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -219,7 +219,7 @@ export default function AdminPanel() {
                   filteredVehicles.map(v => (
                     <tr key={v.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 text-gray-400">{v.id}</td>
-                      <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year}</td>
+                      <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year} {v.patente && `| Patente: ${v.patente}`}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => handleOpenModal(v)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
@@ -299,6 +299,22 @@ export default function AdminPanel() {
                 <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Año</label>
                   <input type="text" value={formData.year || ""} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Patente</label>
+                  <input type="text" value={formData.patente || ""} onChange={e => setFormData({...formData, patente: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Chasis / VIN</label>
+                  <input type="text" value={formData.chasis || ""} onChange={e => setFormData({...formData, chasis: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">PIN Code</label>
+                  <input type="text" value={formData.pinCode || ""} onChange={e => setFormData({...formData, pinCode: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Código de Corte</label>
+                  <input type="text" value={formData.codigoCorte || ""} onChange={e => setFormData({...formData, codigoCorte: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Motor</label>

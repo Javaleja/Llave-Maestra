@@ -73,6 +73,12 @@ export default function Ficha({ vehicleId }: FichaProps) {
           <span>{data.model}</span>
           <span className="text-[#D1D5DB]">/</span>
           <span>{data.year}</span>
+          {data.patente && (
+            <>
+              <span className="text-[#D1D5DB]">/</span>
+              <span>Patente: {data.patente}</span>
+            </>
+          )}
         </div>
 
         {/* Title */}
@@ -103,6 +109,9 @@ export default function Ficha({ vehicleId }: FichaProps) {
 
         {/* Properties (Notion Style Grid) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 mb-12">
+          <SpecItem label="Chasis / VIN" value={data.chasis} />
+          <SpecItem label="PIN Code" value={data.pinCode} />
+          <SpecItem label="Código de Corte" value={data.codigoCorte} />
           <SpecItem label="ECU" value={data.ecu} />
           <SpecItem label="BCM / Cuadro" value={data.bcm} />
           <SpecItem label="Sistema Inmovilizador" value={data.immoSystem} />

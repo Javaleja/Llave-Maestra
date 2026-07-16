@@ -24,6 +24,10 @@ export default function EditVehicleModal({ vehicleId, isOpen, onClose, onSaved }
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
+  const [patente, setPatente] = useState("");
+  const [chasis, setChasis] = useState("");
+  const [pinCode, setPinCode] = useState("");
+  const [codigoCorte, setCodigoCorte] = useState("");
   const [ecu, setEcu] = useState("");
   const [bcm, setBcm] = useState("");
   const [chip, setChip] = useState("");
@@ -42,6 +46,10 @@ export default function EditVehicleModal({ vehicleId, isOpen, onClose, onSaved }
           setMake(data.make || "");
           setModel(data.model || "");
           setYear(data.year || "");
+          setPatente(data.patente || "");
+          setChasis(data.chasis || "");
+          setPinCode(data.pinCode || "");
+          setCodigoCorte(data.codigoCorte || "");
           setEcu(data.ecu || "");
           setBcm(data.bcm || "");
           setChip(data.chip || "");
@@ -65,6 +73,10 @@ export default function EditVehicleModal({ vehicleId, isOpen, onClose, onSaved }
           make,
           model,
           year,
+          patente,
+          chasis,
+          pinCode,
+          codigoCorte,
           ecu,
           bcm,
           chip,
@@ -121,12 +133,15 @@ export default function EditVehicleModal({ vehicleId, isOpen, onClose, onSaved }
                 <div><Label>Marca *</Label><Input value={make} onChange={(e: any) => setMake(e.target.value)} /></div>
                 <div><Label>Modelo *</Label><Input value={model} onChange={(e: any) => setModel(e.target.value)} /></div>
                 <div><Label>Año *</Label><Input value={year} onChange={(e: any) => setYear(e.target.value)} /></div>
+                <div><Label>Patente</Label><Input value={patente} onChange={(e: any) => setPatente(e.target.value)} /></div>
+                <div className="col-span-1 sm:col-span-2"><Label>Chasis / VIN</Label><Input value={chasis} onChange={(e: any) => setChasis(e.target.value)} /></div>
               </div>
             </div>
 
             <div className="space-y-6 pt-6 border-t border-[#F3F4F6]">
-              <h3 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones (Opcional)</h3>
+              <h3 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones y Códigos de Seguridad</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div><Label>PIN Code</Label><Input value={pinCode} onChange={(e: any) => setPinCode(e.target.value)} /></div>
                 <div><Label>Chip (Transponder)</Label><Input value={chip} onChange={(e: any) => setChip(e.target.value)} /></div>
                 <div><Label>Frecuencia</Label><Input value={frequency} onChange={(e: any) => setFrequency(e.target.value)} /></div>
                 <div><Label>ECU</Label><Input value={ecu} onChange={(e: any) => setEcu(e.target.value)} /></div>
@@ -138,6 +153,7 @@ export default function EditVehicleModal({ vehicleId, isOpen, onClose, onSaved }
               <h3 className="text-[18px] font-bold text-[#111111] mb-6">Cilindro</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div><Label>Espadín</Label><Input value={keyBlade} onChange={(e: any) => setKeyBlade(e.target.value)} /></div>
+                <div><Label>Código de Corte</Label><Input value={codigoCorte} onChange={(e: any) => setCodigoCorte(e.target.value)} /></div>
                 <div><Label>Claves Puerta</Label><Input type="number" value={clavesPuerta} onChange={(e: any) => setClavesPuerta(e.target.value)} /></div>
                 <div><Label>Claves Contacto</Label><Input type="number" value={clavesContacto} onChange={(e: any) => setClavesContacto(e.target.value)} /></div>
                 <div className="col-span-1 sm:col-span-2">

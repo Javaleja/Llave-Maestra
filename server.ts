@@ -28,6 +28,8 @@ async function startServer() {
           or(
             like(vehicles.make, searchPattern),
             like(vehicles.model, searchPattern),
+            like(vehicles.patente, searchPattern),
+            like(vehicles.chasis, searchPattern),
             like(vehicles.engine, searchPattern),
             like(vehicles.ecu, searchPattern),
             like(vehicles.bcm, searchPattern)
@@ -137,6 +139,13 @@ async function startServer() {
       } else if (vId && newVehicleInfo) {
         // Optionally update vehicle (e.g. chip, frequency) if they changed
         const updateData: any = {};
+        if (newVehicleInfo.make !== undefined) updateData.make = newVehicleInfo.make;
+        if (newVehicleInfo.model !== undefined) updateData.model = newVehicleInfo.model;
+        if (newVehicleInfo.year !== undefined) updateData.year = newVehicleInfo.year;
+        if (newVehicleInfo.patente !== undefined) updateData.patente = newVehicleInfo.patente;
+        if (newVehicleInfo.chasis !== undefined) updateData.chasis = newVehicleInfo.chasis;
+        if (newVehicleInfo.pinCode !== undefined) updateData.pinCode = newVehicleInfo.pinCode;
+        if (newVehicleInfo.codigoCorte !== undefined) updateData.codigoCorte = newVehicleInfo.codigoCorte;
         if (newVehicleInfo.chip !== undefined) updateData.chip = newVehicleInfo.chip;
         if (newVehicleInfo.frequency !== undefined) updateData.frequency = newVehicleInfo.frequency;
         if (newVehicleInfo.ecu !== undefined) updateData.ecu = newVehicleInfo.ecu;
@@ -213,6 +222,13 @@ async function startServer() {
 
       if (newVehicleInfo) {
         const updateData: any = {};
+        if (newVehicleInfo.make !== undefined) updateData.make = newVehicleInfo.make;
+        if (newVehicleInfo.model !== undefined) updateData.model = newVehicleInfo.model;
+        if (newVehicleInfo.year !== undefined) updateData.year = newVehicleInfo.year;
+        if (newVehicleInfo.patente !== undefined) updateData.patente = newVehicleInfo.patente;
+        if (newVehicleInfo.chasis !== undefined) updateData.chasis = newVehicleInfo.chasis;
+        if (newVehicleInfo.pinCode !== undefined) updateData.pinCode = newVehicleInfo.pinCode;
+        if (newVehicleInfo.codigoCorte !== undefined) updateData.codigoCorte = newVehicleInfo.codigoCorte;
         if (newVehicleInfo.chip !== undefined) updateData.chip = newVehicleInfo.chip;
         if (newVehicleInfo.frequency !== undefined) updateData.frequency = newVehicleInfo.frequency;
         if (newVehicleInfo.ecu !== undefined) updateData.ecu = newVehicleInfo.ecu;
