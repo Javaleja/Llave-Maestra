@@ -44,6 +44,7 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
   const [clavesPuerta, setClavesPuerta] = useState("");
   const [clavesContacto, setClavesContacto] = useState("");
   const [mismasClaves, setMismasClaves] = useState("");
+  const [keyBlade, setKeyBlade] = useState("");
 
   useEffect(() => {
     if (vehicleId) {
@@ -61,6 +62,7 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
           setClavesPuerta(data.clavesPuerta !== null && data.clavesPuerta !== undefined ? String(data.clavesPuerta) : "");
           setClavesContacto(data.clavesContacto !== null && data.clavesContacto !== undefined ? String(data.clavesContacto) : "");
           setMismasClaves(data.mismasClaves || "");
+          setKeyBlade(data.keyBlade || "");
           setIsLoadingVehicle(false);
         })
         .catch(err => {
@@ -113,6 +115,7 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
           bcm, 
           chip, 
           frequency,
+          keyBlade,
           clavesPuerta: clavesPuerta ? parseInt(clavesPuerta, 10) : null,
           clavesContacto: clavesContacto ? parseInt(clavesContacto, 10) : null,
           mismasClaves: mismasClaves || null
@@ -178,16 +181,26 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
             <div className="space-y-6 pt-6 border-t border-[#F3F4F6]">
               <h2 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones (Opcional)</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div><Label>ECU</Label><Input value={ecu} onChange={(e: any) => setEcu(e.target.value)} placeholder="Ej. Bosch EDC17" /></div>
-                <div><Label>BCM / Cuadro</Label><Input value={bcm} onChange={(e: any) => setBcm(e.target.value)} placeholder="Ej. MQB VDO" /></div>
                 <div><Label>Chip (Transponder)</Label><Input value={chip} onChange={(e: any) => setChip(e.target.value)} placeholder="Ej. ID48 Megamos" /></div>
                 <div><Label>Frecuencia</Label><Input value={frequency} onChange={(e: any) => setFrequency(e.target.value)} placeholder="Ej. 433 MHz" /></div>
+                <div><Label>ECU</Label><Input value={ecu} onChange={(e: any) => setEcu(e.target.value)} placeholder="Ej. Bosch EDC17" /></div>
+                <div><Label>BCM / Cuadro</Label><Input value={bcm} onChange={(e: any) => setBcm(e.target.value)} placeholder="Ej. MQB VDO" /></div>
               </div>
             </div>
 
             <div className="space-y-6 pt-6 border-t border-[#F3F4F6]">
               <h2 className="text-[18px] font-bold text-[#111111] mb-6">Especificaciones del Cilindro</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div>
+                  <Label>Espadín</Label>
+                  <Input 
+                    value={keyBlade} 
+                    onChange={(e: any) => setKeyBlade(e.target.value)} 
+                    disabled={!!vehicleId}
+                    placeholder="Ej. HU66, SIP22" 
+                    className={vehicleId ? "opacity-50" : ""}
+                  />
+                </div>
                 <div>
                   <Label>Claves en Puerta</Label>
                   <Input 

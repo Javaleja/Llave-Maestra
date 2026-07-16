@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, X, Search as SearchIcon } from "lucide-react";
+import ImageUploader from "./ImageUploader";
+
+const safeJsonParse = (str: string | null) => {
+  if (!str) return [];
+  try {
+    return JSON.parse(str);
+  } catch {
+    return [];
+  }
+};
 
 type Vehicle = {
   id: number;
@@ -17,6 +27,7 @@ type Vehicle = {
   clavesPuerta: number | null;
   clavesContacto: number | null;
   mismasClaves: string | null;
+  photos: string | null;
 };
 
 export default function AdminPanel() {
@@ -27,12 +38,13 @@ export default function AdminPanel() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [newPhotos, setNewPhotos] = useState<string[]>([]);
   
   // Form state
   const [formData, setFormData] = useState<Partial<Vehicle>>({
     make: "", model: "", year: "", engine: "", ecu: "", bcm: "",
     immoSystem: "", chip: "", frequency: "", keyBlade: "", warnings: "",
-    clavesPuerta: null, clavesContacto: null, mismasClaves: ""
+    clavesPuerta: null, clavesContacto: null, mismasClaves: "", photos: null
   });
 
   const fetchVehicles = async () => {
@@ -55,6 +67,7 @@ export default function AdminPanel() {
   }, []);
 
   const handleOpenModal = (vehicle?: Vehicle) => {
+    setNewPhotos([]);
     if (vehicle) {
       setEditingVehicle(vehicle);
       setFormData(vehicle);
@@ -63,7 +76,7 @@ export default function AdminPanel() {
       setFormData({
         make: "", model: "", year: "", engine: "", ecu: "", bcm: "",
         immoSystem: "", chip: "", frequency: "", keyBlade: "", warnings: "",
-        clavesPuerta: null, clavesContacto: null, mismasClaves: ""
+        clavesPuerta: null, clavesContacto: null, mismasClaves: "", photos: null
       });
     }
     setIsModalOpen(true);
@@ -72,6 +85,7 @@ export default function AdminPanel() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingVehicle(null);
+    setNewPhotos([]);
   };
 
   const handleSave = async () => {
@@ -79,10 +93,16 @@ export default function AdminPanel() {
       const url = editingVehicle ? `/api/vehicles/${editingVehicle.id}` : "/api/vehicles";
       const method = editingVehicle ? "PUT" : "POST";
       
+      const payload = { ...formData };
+      if (newPhotos.length > 0) {
+        const existingPhotos = safeJsonParse(payload.photos || null);
+        payload.photos = JSON.stringify([...existingPhotos, ...newPhotos]);
+      }
+      
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       
       if (res.ok) {
@@ -245,7 +265,30 @@ export default function AdminPanel() {
                   </select>
                 </div>
               </div>
+              
+              <div className="mt-8 pt-8 border-t border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Fotografías del Vehículo</h3>
+                
+                {formData.photos && safeJsonParse(formData.photos).length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-3">Imágenes existentes</h4>
+                    <div className="flex gap-4 overflow-x-auto pb-4">
+                      {safeJsonParse(formData.photos).map((photo: string, i: number) => (
+                        <div key={i} className="flex-none w-32 aspect-video rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+                          <img src={photo} alt={`Foto ${i+1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-500 mb-3">Subir nuevas imágenes</h4>
+                  <ImageUploader onImagesChange={setNewPhotos} maxFiles={5} />
+                </div>
+              </div>
             </div>
+
             <div className="px-8 py-6 border-t border-gray-100 flex justify-end gap-3 shrink-0">
               <button onClick={handleCloseModal} className="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-black transition-colors">Cancelar</button>
               <button onClick={handleSave} className="px-5 py-2.5 text-sm font-medium bg-black text-white rounded-full hover:opacity-90 transition-opacity">Guardar Cambios</button>

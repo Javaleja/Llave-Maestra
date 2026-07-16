@@ -15,6 +15,13 @@
       "when": 1784131241324,
       "tag": "0001_quick_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784167209598,
+      "tag": "0002_special_nico_minoru",
+      "breakpoints": true
     }
   ]
 }
