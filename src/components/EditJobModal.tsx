@@ -13,13 +13,14 @@ const safeJsonParse = (str: string | null) => {
 };
 
 interface EditJobModalProps {
-  job: any;
+  job?: any;
+  vehicleId?: number;
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobModalProps) {
+export default function EditJobModal({ job, vehicleId, isOpen, onClose, onSaved }: EditJobModalProps) {
   const [jobType, setJobType] = useState("");
   const [methods, setMethods] = useState("");
   const [scanner, setScanner] = useState("");
@@ -30,25 +31,34 @@ export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobM
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (job && isOpen) {
-      setJobType(job.jobType || job.tipoServicio || "");
-      setScanner(job.scanner || "");
-      setControlGenerado(job.controlGenerado || "");
-      setNotes(job.notes || "");
-      
-      if (job.methods) {
-        try {
-          setMethods(JSON.parse(job.methods).join('\n'));
-        } catch {
+    if (isOpen) {
+      if (job) {
+        setJobType(job.jobType || job.tipoServicio || "");
+        setScanner(job.scanner || "");
+        setControlGenerado(job.controlGenerado || "");
+        setNotes(job.notes || "");
+        
+        if (job.methods) {
+          try {
+            setMethods(JSON.parse(job.methods).join('\n'));
+          } catch {
+            setMethods("");
+          }
+        } else {
           setMethods("");
         }
+        
+        if (job.photos) {
+          setExistingPhotos(safeJsonParse(job.photos));
+        } else {
+          setExistingPhotos([]);
+        }
       } else {
+        setJobType("");
+        setScanner("");
+        setControlGenerado("");
+        setNotes("");
         setMethods("");
-      }
-      
-      if (job.photos) {
-        setExistingPhotos(safeJsonParse(job.photos));
-      } else {
         setExistingPhotos([]);
       }
       setPhotos([]);
@@ -60,7 +70,7 @@ export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobM
   };
 
   const handleSave = async () => {
-    if (!job) return;
+    if (!job && !vehicleId) return;
     setIsSaving(true);
     try {
       const methodsArray = methods.split('\n').map(m => m.trim()).filter(m => m !== '');
@@ -69,7 +79,7 @@ export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobM
       const finalPhotos = [...existingPhotos, ...photos];
       
       const payload = {
-        vehicleId: job.vehicleId,
+        vehicleId: job ? job.vehicleId : vehicleId,
         jobType,
         tipoServicio: jobType,
         methods: JSON.stringify(methodsArray),
@@ -79,8 +89,11 @@ export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobM
         photos: JSON.stringify(finalPhotos)
       };
 
-      const res = await fetch(`/api/jobs/${job.id}`, {
-        method: 'PUT',
+      const url = job ? `/api/jobs/${job.id}` : '/api/jobs';
+      const method = job ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -109,7 +122,7 @@ export default function EditJobModal({ job, isOpen, onClose, onSaved }: EditJobM
         className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
       >
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white z-10">
-          <h2 className="text-xl font-bold text-gray-900">Editar Trabajo</h2>
+          <h2 className="text-xl font-bold text-gray-900">{job ? "Editar Trabajo" : "Añadir Trabajo"}</h2>
           <button 
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors"

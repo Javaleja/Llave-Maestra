@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { AlertTriangle, Clock, ChevronRight, FileText, Camera, Trash2, Edit2, X } from "lucide-react";
+import { AlertTriangle, Clock, ChevronRight, FileText, Camera, Trash2, Edit2, X, Plus } from "lucide-react";
+
+import EditJobModal from "./EditJobModal";
 
 interface FichaProps {
   vehicleId: number;
@@ -19,6 +21,7 @@ const safeJsonParse = (str: string | null) => {
 export default function Ficha({ vehicleId }: FichaProps) {
   const [data, setData] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isAddingJob, setIsAddingJob] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -139,9 +142,18 @@ export default function Ficha({ vehicleId }: FichaProps) {
         )}
 
         {/* Jobs History */}
-        {data.jobs && data.jobs.length > 0 && (
-          <div className="pt-8">
-            <h2 className="text-[24px] font-bold text-[#111111] mb-8">Historial de Trabajos</h2>
+        <div className="pt-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-[24px] font-bold text-[#111111]">Historial de Trabajos</h2>
+            <button 
+              onClick={() => setIsAddingJob(true)}
+              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+              Añadir Nuevo Trabajo
+            </button>
+          </div>
+          {data.jobs && data.jobs.length > 0 ? (
             <div className="space-y-12">
               {data.jobs.map((job: any) => (
                 <div key={job.id} className="relative pl-6 border-l-2 border-[#F3F4F6] group">
@@ -216,8 +228,12 @@ export default function Ficha({ vehicleId }: FichaProps) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-gray-100">
+              No hay trabajos registrados para este vehículo.
+            </div>
+          )}
+        </div>
       </div>
 
       <AnimatePresence>
@@ -252,6 +268,18 @@ export default function Ficha({ vehicleId }: FichaProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {isAddingJob && (
+        <EditJobModal
+          vehicleId={vehicleId}
+          isOpen={isAddingJob}
+          onClose={() => setIsAddingJob(false)}
+          onSaved={() => {
+            setIsAddingJob(false);
+            fetchData();
+          }}
+        />
+      )}
     </motion.div>
   );
 }
