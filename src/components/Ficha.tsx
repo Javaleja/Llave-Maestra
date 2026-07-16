@@ -16,12 +16,9 @@ const safeJsonParse = (str: string | null) => {
   }
 };
 
-import EditJobModal from "./EditJobModal";
-
 export default function Ficha({ vehicleId }: FichaProps) {
   const [data, setData] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [editingJob, setEditingJob] = useState<any>(null);
 
   const fetchData = async () => {
     try {
@@ -36,21 +33,6 @@ export default function Ficha({ vehicleId }: FichaProps) {
   useEffect(() => {
     fetchData();
   }, [vehicleId]);
-
-  const handleDeleteJob = async (jobId: number) => {
-    if (confirm("¿Estás seguro de que quieres eliminar este trabajo?")) {
-      try {
-        const res = await fetch(`/api/jobs/${jobId}`, {
-          method: 'DELETE'
-        });
-        if (res.ok) {
-          fetchData();
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
 
   if (!data) {
     return (
@@ -177,22 +159,6 @@ export default function Ficha({ vehicleId }: FichaProps) {
                           {job.jobType || job.tipoServicio}
                         </span>
                       </div>
-                      <div className="flex gap-2">
-                          <button
-                            onClick={() => setEditingJob(job)}
-                            className="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Editar trabajo"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                        <button
-                          onClick={() => handleDeleteJob(job.id)}
-                          className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Eliminar trabajo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
                     </div>
                     <div className="flex items-center gap-3 text-[13px] text-[#6B7280]">
                       <span>{new Date(job.date).toLocaleDateString()}</span>
@@ -286,16 +252,6 @@ export default function Ficha({ vehicleId }: FichaProps) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <EditJobModal 
-        job={editingJob} 
-        isOpen={!!editingJob} 
-        onClose={() => setEditingJob(null)} 
-        onSaved={() => {
-          setEditingJob(null);
-          fetchData();
-        }} 
-      />
     </motion.div>
   );
 }

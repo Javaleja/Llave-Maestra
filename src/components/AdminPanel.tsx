@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Edit, Trash2, Plus, X, Search as SearchIcon } from "lucide-react";
+import { Edit, Trash2, Plus, X, Search as SearchIcon, FileText } from "lucide-react";
+import EditJobModal from "./EditJobModal";
 
 const safeJsonParse = (str: string | null) => {
   if (!str) return [];
@@ -32,12 +33,15 @@ type Vehicle = {
 
 export default function AdminPanel() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"vehicles" | "jobs">("vehicles");
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [editingJob, setEditingJob] = useState<any | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<Partial<Vehicle>>({
@@ -46,23 +50,31 @@ export default function AdminPanel() {
     clavesPuerta: null, clavesContacto: null, mismasClaves: "", controlGenerado: null, photos: null
   });
 
-  const fetchVehicles = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/vehicles?_t=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
+      const [vehiclesRes, jobsRes] = await Promise.all([
+        fetch(`/api/vehicles?_t=${Date.now()}`),
+        fetch(`/api/jobs?_t=${Date.now()}`)
+      ]);
+      
+      if (vehiclesRes.ok) {
+        const data = await vehiclesRes.json();
         setVehicles(data);
       }
+      if (jobsRes.ok) {
+        const data = await jobsRes.json();
+        setJobs(data);
+      }
     } catch (error) {
-      console.error("Failed to fetch vehicles", error);
+      console.error("Failed to fetch data", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVehicles();
+    fetchData();
   }, []);
 
   const handleOpenModal = (vehicle?: Vehicle) => {
@@ -99,7 +111,7 @@ export default function AdminPanel() {
       });
       
       if (res.ok) {
-        fetchVehicles();
+        fetchData();
         handleCloseModal();
       } else {
         alert("Error saving vehicle");
@@ -124,20 +136,55 @@ export default function AdminPanel() {
     }
   };
 
+  const handleDeleteJob = async (id: number) => {
+    if (!confirm("¿Estás seguro de eliminar este trabajo?")) return;
+    try {
+      const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setJobs(jobs.filter(j => j.id !== id));
+      } else {
+        alert("Error deleting job");
+      }
+    } catch (error) {
+      console.error("Delete job error", error);
+    }
+  };
+
   const filteredVehicles = vehicles.filter(v => 
     `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredJobs = jobs.filter(j => 
+    `${j.jobType} ${j.tipoServicio}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Panel de Administración</h2>
+        {activeTab === "vehicles" && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            Añadir Vehículo
+          </button>
+        )}
+      </div>
+      
+      <div className="flex gap-4 mb-6">
         <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+          onClick={() => setActiveTab("vehicles")}
+          className={`px-4 py-2 font-medium text-sm rounded-full transition-colors ${activeTab === "vehicles" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
         >
-          <Plus className="w-4 h-4" />
-          Añadir Vehículo
+          Vehículos
+        </button>
+        <button 
+          onClick={() => setActiveTab("jobs")}
+          className={`px-4 py-2 font-medium text-sm rounded-full transition-colors ${activeTab === "jobs" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+        >
+          Trabajos
         </button>
       </div>
 
@@ -146,7 +193,7 @@ export default function AdminPanel() {
           <SearchIcon className="w-5 h-5 text-gray-400" />
           <input 
             type="text"
-            placeholder="Buscar por marca, modelo o año..."
+            placeholder={activeTab === "vehicles" ? "Buscar por marca, modelo o año..." : "Buscar por tipo de servicio..."}
             className="flex-1 outline-none text-sm placeholder:text-gray-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -154,39 +201,79 @@ export default function AdminPanel() {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50/50 text-gray-500 font-medium">
-              <tr>
-                <th className="px-6 py-4">ID</th>
-                <th className="px-6 py-4">Vehículo</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr><td colSpan={3} className="px-6 py-12 text-center text-gray-400">Cargando datos...</td></tr>
-              ) : filteredVehicles.length === 0 ? (
-                <tr><td colSpan={3} className="px-6 py-12 text-center text-gray-400">No se encontraron vehículos.</td></tr>
-              ) : (
-                filteredVehicles.map(v => (
-                  <tr key={v.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-gray-400">{v.id}</td>
-                    <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleOpenModal(v)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDelete(v.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          {activeTab === "vehicles" ? (
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-gray-50/50 text-gray-500 font-medium">
+                <tr>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Vehículo</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr><td colSpan={3} className="px-6 py-12 text-center text-gray-400">Cargando datos...</td></tr>
+                ) : filteredVehicles.length === 0 ? (
+                  <tr><td colSpan={3} className="px-6 py-12 text-center text-gray-400">No se encontraron vehículos.</td></tr>
+                ) : (
+                  filteredVehicles.map(v => (
+                    <tr key={v.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-400">{v.id}</td>
+                      <td className="px-6 py-4 font-medium">{v.make} {v.model} {v.year}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => handleOpenModal(v)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDelete(v.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-gray-50/50 text-gray-500 font-medium">
+                <tr>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Tipo de Servicio</th>
+                  <th className="px-6 py-4">Vehículo ID</th>
+                  <th className="px-6 py-4">Fecha</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400">Cargando datos...</td></tr>
+                ) : filteredJobs.length === 0 ? (
+                  <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400">No se encontraron trabajos.</td></tr>
+                ) : (
+                  filteredJobs.map(j => (
+                    <tr key={j.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-400">{j.id}</td>
+                      <td className="px-6 py-4 font-medium">{j.jobType || j.tipoServicio}</td>
+                      <td className="px-6 py-4 text-gray-500">{j.vehicleId}</td>
+                      <td className="px-6 py-4 text-gray-500">{new Date(j.date).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => setEditingJob(j)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors" title="Editar trabajo">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDeleteJob(j.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -271,6 +358,16 @@ export default function AdminPanel() {
           </div>
         </div>
       )}
+
+      <EditJobModal 
+        job={editingJob} 
+        isOpen={!!editingJob} 
+        onClose={() => setEditingJob(null)} 
+        onSaved={() => {
+          setEditingJob(null);
+          fetchData();
+        }} 
+      />
     </div>
   );
 }
