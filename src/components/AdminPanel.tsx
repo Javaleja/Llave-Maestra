@@ -89,6 +89,14 @@ export default function AdminPanel() {
     setNewPhotos([]);
   };
 
+  const handleRemoveExistingPhoto = (photoUrlToRemove: string) => {
+    if (formData.photos) {
+      const currentPhotos = safeJsonParse(formData.photos);
+      const updatedPhotos = currentPhotos.filter((photo: string) => photo !== photoUrlToRemove);
+      setFormData({ ...formData, photos: JSON.stringify(updatedPhotos) });
+    }
+  };
+
   const handleSave = async () => {
     try {
       const url = editingVehicle ? `/api/vehicles/${editingVehicle.id}` : "/api/vehicles";
@@ -274,22 +282,14 @@ export default function AdminPanel() {
               <div className="mt-8 pt-8 border-t border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Fotografías del Vehículo</h3>
                 
-                {formData.photos && safeJsonParse(formData.photos).length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-3">Imágenes existentes</h4>
-                    <div className="flex gap-4 overflow-x-auto pb-4">
-                      {safeJsonParse(formData.photos).map((photo: string, i: number) => (
-                        <div key={i} className="flex-none w-32 aspect-video rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
-                          <img src={photo} alt={`Foto ${i+1}`} className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 mb-3">Subir nuevas imágenes</h4>
-                  <ImageUploader onImagesChange={setNewPhotos} maxFiles={5} />
+                  <ImageUploader 
+                    onImagesChange={setNewPhotos} 
+                    maxFiles={5}
+                    existingImages={formData.photos ? safeJsonParse(formData.photos) : []}
+                    onRemoveExistingImage={handleRemoveExistingPhoto}
+                  />
                 </div>
               </div>
             </div>

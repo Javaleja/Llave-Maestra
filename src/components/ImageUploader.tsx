@@ -7,9 +7,11 @@ import { supabase } from "../lib/supabase";
 interface ImageUploaderProps {
   onImagesChange: (urls: string[]) => void;
   maxFiles?: number;
+  existingImages?: string[];
+  onRemoveExistingImage?: (url: string) => void;
 }
 
-export default function ImageUploader({ onImagesChange, maxFiles = 5 }: ImageUploaderProps) {
+export default function ImageUploader({ onImagesChange, maxFiles = 5, existingImages = [], onRemoveExistingImage }: ImageUploaderProps) {
   const [images, setImages] = useState<{ file?: File, url: string, uploading: boolean, error?: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -141,12 +143,35 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5 }: ImageUpl
         />
       </div>
 
-      {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {((existingImages && existingImages.length > 0) || images.length > 0) && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[300px] overflow-y-auto pr-2 pb-2">
           <AnimatePresence>
+            {existingImages?.map((url, idx) => (
+              <motion.div 
+                key={`existing-${url}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="relative aspect-square rounded-xl overflow-hidden bg-[#F9FAFB] border border-[#E5E7EB] group"
+              >
+                <img 
+                  src={url} 
+                  alt="Existing" 
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onRemoveExistingImage?.(url); }}
+                  className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#111111] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            ))}
+            
             {images.map((img, idx) => (
               <motion.div 
-                key={img.url}
+                key={`new-${img.url}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
@@ -173,6 +198,7 @@ export default function ImageUploader({ onImagesChange, maxFiles = 5 }: ImageUpl
 
                 {!img.uploading && (
                   <button
+                    type="button"
                     onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
                     className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#111111] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
                   >
