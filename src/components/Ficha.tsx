@@ -109,6 +109,7 @@ export default function Ficha({ vehicleId, onEditJob }: FichaProps) {
           <SpecItem label="Transponder (Chip)" value={data.chip} />
           <SpecItem label="Frecuencia" value={data.frequency} />
           <SpecItem label="Espada" value={data.keyBlade} />
+          <SpecItem label="ID Control VVDI" value={data.controlGenerado} />
         </div>
 
         {/* Especificaciones del Cilindro (Análisis de Pérdida Total) */}
@@ -149,6 +150,23 @@ export default function Ficha({ vehicleId, onEditJob }: FichaProps) {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {data.photos && safeJsonParse(data.photos).length > 0 && (
+          <div className="mb-16">
+            <h3 className="text-[12px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-4">Fotografías del Vehículo</h3>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0">
+              {safeJsonParse(data.photos).map((photo: string, i: number) => (
+                <div 
+                  key={i} 
+                  onClick={() => setSelectedImage(photo)}
+                  className="flex-none w-[200px] aspect-[4/3] rounded-xl overflow-hidden bg-[#F9FAFB] border border-[#E5E7EB] cursor-pointer hover:opacity-90 transition-opacity"
+                >
+                  <img src={photo} alt={`Foto del vehículo ${i+1}`} className="w-full h-full object-cover pointer-events-none" />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

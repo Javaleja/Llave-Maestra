@@ -51,7 +51,7 @@ export default function AdminPanel() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/vehicles");
+      const res = await fetch(`/api/vehicles?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setVehicles(data);

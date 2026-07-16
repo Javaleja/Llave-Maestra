@@ -56,7 +56,8 @@ async function startServer() {
   // Create vehicle (Admin)
   app.post("/api/vehicles", async (req, res) => {
     try {
-      const newV = await db.insert(vehicles).values(req.body).returning();
+      const { id, ...vehicleData } = req.body;
+      const newV = await db.insert(vehicles).values(vehicleData).returning();
       res.json(newV[0]);
     } catch (error) {
       console.error("Create vehicle error:", error);
@@ -68,7 +69,8 @@ async function startServer() {
   app.put("/api/vehicles/:id", async (req, res) => {
     try {
       const vehicleId = parseInt(req.params.id);
-      const updated = await db.update(vehicles).set(req.body).where(eq(vehicles.id, vehicleId)).returning();
+      const { id, ...updateData } = req.body;
+      const updated = await db.update(vehicles).set(updateData).where(eq(vehicles.id, vehicleId)).returning();
       res.json(updated[0]);
     } catch (error) {
       console.error("Update vehicle error:", error);
@@ -139,6 +141,7 @@ async function startServer() {
         if (newVehicleInfo.frequency !== undefined) updateData.frequency = newVehicleInfo.frequency;
         if (newVehicleInfo.ecu !== undefined) updateData.ecu = newVehicleInfo.ecu;
         if (newVehicleInfo.bcm !== undefined) updateData.bcm = newVehicleInfo.bcm;
+        if (newVehicleInfo.keyBlade !== undefined) updateData.keyBlade = newVehicleInfo.keyBlade;
         if (newVehicleInfo.clavesPuerta !== undefined) updateData.clavesPuerta = newVehicleInfo.clavesPuerta;
         if (newVehicleInfo.clavesContacto !== undefined) updateData.clavesContacto = newVehicleInfo.clavesContacto;
         if (newVehicleInfo.mismasClaves !== undefined) updateData.mismasClaves = newVehicleInfo.mismasClaves;
@@ -214,6 +217,7 @@ async function startServer() {
         if (newVehicleInfo.frequency !== undefined) updateData.frequency = newVehicleInfo.frequency;
         if (newVehicleInfo.ecu !== undefined) updateData.ecu = newVehicleInfo.ecu;
         if (newVehicleInfo.bcm !== undefined) updateData.bcm = newVehicleInfo.bcm;
+        if (newVehicleInfo.keyBlade !== undefined) updateData.keyBlade = newVehicleInfo.keyBlade;
         if (newVehicleInfo.clavesPuerta !== undefined) updateData.clavesPuerta = newVehicleInfo.clavesPuerta;
         if (newVehicleInfo.clavesContacto !== undefined) updateData.clavesContacto = newVehicleInfo.clavesContacto;
         if (newVehicleInfo.mismasClaves !== undefined) updateData.mismasClaves = newVehicleInfo.mismasClaves;
