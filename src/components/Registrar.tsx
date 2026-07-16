@@ -286,7 +286,7 @@ export default function Registrar({ onSave, vehicleId, jobId }: RegistrarProps) 
                   </div>
                 </div>
                 <div><Label>Scanner</Label><Input value={scanner} onChange={(e: any) => setScanner(e.target.value)} placeholder="Ej. Autel IM608" /></div>
-                <div><Label>Control Generado</Label><Input value={controlGenerado} onChange={(e: any) => setControlGenerado(e.target.value)} placeholder="Ej. Xhorse Universal..." /></div>
+                <div><Label>ID Control VVDI</Label><Input value={controlGenerado} onChange={(e: any) => setControlGenerado(e.target.value)} /></div>
               </div>
             </div>
 

@@ -16,6 +16,7 @@ export const vehicles = pgTable("vehicles", {
   clavesPuerta: integer("claves_puerta"),
   clavesContacto: integer("claves_contacto"),
   mismasClaves: text("mismas_claves"),
+  controlGenerado: text("control_generado"),
   photos: text("photos"),
 });
 

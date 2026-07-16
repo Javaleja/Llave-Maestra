@@ -27,6 +27,7 @@ type Vehicle = {
   clavesPuerta: number | null;
   clavesContacto: number | null;
   mismasClaves: string | null;
+  controlGenerado: string | null;
   photos: string | null;
 };
 
@@ -44,7 +45,7 @@ export default function AdminPanel() {
   const [formData, setFormData] = useState<Partial<Vehicle>>({
     make: "", model: "", year: "", engine: "", ecu: "", bcm: "",
     immoSystem: "", chip: "", frequency: "", keyBlade: "", warnings: "",
-    clavesPuerta: null, clavesContacto: null, mismasClaves: "", photos: null
+    clavesPuerta: null, clavesContacto: null, mismasClaves: "", controlGenerado: null, photos: null
   });
 
   const fetchVehicles = async () => {
@@ -76,7 +77,7 @@ export default function AdminPanel() {
       setFormData({
         make: "", model: "", year: "", engine: "", ecu: "", bcm: "",
         immoSystem: "", chip: "", frequency: "", keyBlade: "", warnings: "",
-        clavesPuerta: null, clavesContacto: null, mismasClaves: "", photos: null
+        clavesPuerta: null, clavesContacto: null, mismasClaves: "", controlGenerado: null, photos: null
       });
     }
     setIsModalOpen(true);
@@ -255,6 +256,10 @@ export default function AdminPanel() {
                 <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Claves en Contacto</label>
                   <input type="number" value={formData.clavesContacto !== null && formData.clavesContacto !== undefined ? formData.clavesContacto : ""} onChange={e => setFormData({...formData, clavesContacto: e.target.value ? parseInt(e.target.value, 10) : null})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">ID Control VVDI</label>
+                  <input type="text" value={formData.controlGenerado || ""} onChange={e => setFormData({...formData, controlGenerado: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">¿Mismo número de claves?</label>
